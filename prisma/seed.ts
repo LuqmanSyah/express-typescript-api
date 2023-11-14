@@ -11,19 +11,78 @@ type Book = {
   datePublished: Date;
 };
 
+async function seed() {
+  await Promise.all(
+    getAuthors().map((author) => {
+      return db.author.create({
+        data: {
+          firstName: author.firstName,
+          lastName: author.lastName,
+        },
+      });
+    })
+  );
+
+  const author = await db.author.findFirst({
+    where: {
+      firstName: "user1",
+    },
+  });
+
+  if (author) {
+    await Promise.all(
+      getBooks().map((book) => {
+        const { title, isFiction, datePublished } = book;
+        return db.book.create({
+          data: {
+            title,
+            isFiction,
+            datePublished,
+            authorId: author.id,
+          },
+        });
+      })
+    );
+  } else {
+    console.error("Auhtor not found");
+  }
+}
+
+seed();
+
 function getAuthors(): Array<Author> {
   return [
     {
-      firstName: "p",
-      lastName: "p",
+      firstName: "user1",
+      lastName: "test",
     },
     {
-      firstName: "e",
-      lastName: "e",
+      firstName: "user2",
+      lastName: "test",
     },
     {
-      firstName: "t",
-      lastName: "t",
+      firstName: "user3",
+      lastName: "test",
+    },
+  ];
+}
+
+function getBooks(): Array<Book> {
+  return [
+    {
+      title: "Sapiens",
+      isFiction: false,
+      datePublished: new Date(),
+    },
+    {
+      title: "Homo Deus",
+      isFiction: false,
+      datePublished: new Date(),
+    },
+    {
+      title: "The Ugly Duckling",
+      isFiction: true,
+      datePublished: new Date(),
     },
   ];
 }
